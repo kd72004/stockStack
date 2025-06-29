@@ -1,0 +1,424 @@
+    const mongoose = require('mongoose');
+    const { MaxPriorityQueue, MinPriorityQueue } = require('@datastructures-js/priority-queue');
+
+    const Stock = require('../models/stock');
+    const Order = require('../models/order');
+    const User = require('../models/user');
+    const Portfolio = require('../models/portfolio');
+    const TransactionHistory = require('../models/transactionHistory');
+    const PriceHistory = require('../models/priceHistory'); 
+    const { saveHeap, loadHeap } = require('../utils/redisOrderBook');
+
+
+    // function formatOrder(order) {
+    //     return {
+    //         orderId: order._id.toString(),       
+    //         userId: order.user_id.toString(),
+    //         stockId: order.stock_id.toString(),
+    //         price: order.price,
+    //         quantity: order.qty,
+    //         timestamp: new Date(order.createdAt).getTime(),
+    //     };
+    // }
+
+    
+    // Custom Comparators
+    const buyComparator = (a, b) => {
+    if (a.price !== b.price) return b.price - a.price;
+    if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+    return a.quantity - b.quantity;
+    };
+
+    const sellComparator = (a, b) => {
+    if (a.price !== b.price) return a.price - b.price;
+    if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+    return a.quantity - b.quantity;
+    };
+
+    async function initializeEmptyOrderBooks() {
+        const stocks = await Stock.find();
+        const orderBooks = new Map();
+    
+        for (const stock of stocks) {
+            const buyArr = await loadHeap(stock._id.toString(), 'buy');
+            const sellArr = await loadHeap(stock._id.toString(), 'sell');
+            const buyHeap = new MaxPriorityQueue({ compare: buyComparator, initialValues: buyArr });
+            const sellHeap = new MinPriorityQueue({ compare: sellComparator, initialValues: sellArr });
+    
+            orderBooks.set(stock._id.toString(), { buyHeap, sellHeap });
+        }
+        return orderBooks;
+    }
+
+    async function saveOrderBookToRedis(stockId, buyHeap, sellHeap) {
+        await saveHeap(stockId, 'buy', buyHeap.toArray());
+        await saveHeap(stockId, 'sell', sellHeap.toArray());
+    }
+    
+    async function initializeEmptyOrderBooks() {
+    const stocks = await Stock.find();
+    const orderBooks = new Map();
+
+    for (const stock of stocks) {
+        orderBooks.set(stock._id.toString(), {
+        buyHeap: new MaxPriorityQueue({ compare: buyComparator }),
+        sellHeap: new MinPriorityQueue({ compare: sellComparator })
+        });
+    }
+
+    return orderBooks;
+    }
+
+    let orderBooks = null;
+
+    async function setupOrderBooks() {
+    orderBooks = await initializeEmptyOrderBooks(); 
+    }
+
+    
+    // orderEngine.js
+    function addOrderToHeap(order) {
+        const formattedOrder = {
+            orderId: order._id.toString(),
+            userId: order.user_id.toString(),
+            stockId: order.stock_id.toString(),
+            price: order.price,
+            quantity: order.qty,
+            timestamp: new Date(order.timestamp || order.createdAt).getTime(),
+            type: order.type
+        };
+
+        const book = orderBooks.get(formattedOrder.stockId);
+        if (!book) {
+            throw new Error(`Stock ${formattedOrder.stockId} not found in orderBooks`);
+        }
+
+        if (formattedOrder.type === 'BUY') {
+            book.buyHeap.enqueue(formattedOrder);
+        } else {
+            book.sellHeap.enqueue(formattedOrder);
+        }
+
+        const tradeResults=matchOrdersForStock(formattedOrder.stockId);
+        return tradeResults;
+    }
+
+
+    // // Buy: High price → early time → low qty
+    // const buyComparator = (a, b) => {
+    // if (a.price !== b.price) return b.price - a.price;
+    // if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+    // return a.quantity - b.quantity;
+    // };
+
+    // // Sell: Low price → early time → low qty
+    // const sellComparator = (a, b) => {
+    // if (a.price !== b.price) return a.price - b.price;
+    // if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+    // return a.quantity - b.quantity;
+    // };
+
+    // async function initializeOrderBooks() {
+    // const stocks = await Stock.find();
+    // const orders = await Order.find();
+
+    // for (const stock of stocks) {
+    //     orderBooks.set(stock._id.toString(), {
+    //     stock,
+    //     buyHeap: new MaxPriorityQueue({ compare: buyComparator }),
+    //     sellHeap: new MinPriorityQueue({ compare: sellComparator }),
+    //     });
+    // }
+
+    // for (const order of orders) {
+    //     const book = orderBooks.get(order.stock_id.toString());
+    //     if (!book) continue;
+    //     const formattedOrder = formatOrder(order);
+    //     order.status === 'OPEN' && order.type === 'BUY'
+    //     ? book.buyHeap.enqueue(formattedOrder)
+    //     : order.status === 'OPEN' && book.sellHeap.enqueue(formattedOrder);
+    // }
+
+    // console.log(' Order books initialized.');
+    // }
+
+    // async function matchOrdersForStock(stockId) {
+    // const book = orderBooks.get(stockId);
+    // if (!book) return;
+
+    // const { stock, buyHeap, sellHeap } = book;
+
+    // while (!buyHeap.isEmpty() && !sellHeap.isEmpty()) {
+    //     const topBuy = buyHeap.front();
+    //     const topSell = sellHeap.front();
+
+    //     // 1. Circuit Breaker Check
+    //     if (topBuy.price > stock.upper_circuit || topBuy.price < stock.lower_circuit) {
+    //     buyHeap.dequeue();
+    //     continue;
+    //     }
+    //     if (topSell.price < stock.lower_circuit || topSell.price > stock.upper_circuit) {
+    //     sellHeap.dequeue();
+    //     continue;
+    //     }
+
+    //     // 2. Match condition
+    //     if (topBuy.price >= topSell.price) {
+    //     const matchedQty = Math.min(topBuy.quantity, topSell.quantity);
+    //     const tradePrice = topSell.price;
+
+    //     // 3. Validate balances and portfolio
+    //     const buyer = await User.findById(topBuy.userId);
+    //     const seller = await User.findById(topSell.userId);
+    //     const totalCost = matchedQty * tradePrice;
+
+    //     if (!buyer || !seller) {
+    //         buyHeap.dequeue();
+    //         sellHeap.dequeue();
+    //         continue;
+    //     }
+
+    //     if (buyer.balance < totalCost) {
+    //         buyHeap.dequeue(); // Can't afford
+    //         continue;
+    //     }
+
+    //     const sellerPortfolio = await Portfolio.findOne({
+    //         user_id: topSell.userId,
+    //         stock_id: topSell.stockId,
+    //     });
+
+    //     if (!sellerPortfolio || sellerPortfolio.qty < matchedQty) {
+    //         sellHeap.dequeue(); // Not enough stock
+    //         continue;
+    //     }
+
+    //     // 4. Perform transaction
+    //     buyer.balance -= totalCost;
+    //     seller.balance += totalCost;
+    //     await buyer.save();
+    //     await seller.save();
+
+    //     // 5. Update buyer's portfolio
+    //     let buyerPortfolio = await Portfolio.findOne({
+    //         user_id: topBuy.userId,
+    //         stock_id: topBuy.stockId,
+    //     });
+
+    //     if (buyerPortfolio) {
+    //         buyerPortfolio.qty += matchedQty;
+    //     } else {
+    //         buyerPortfolio = new Portfolio({
+    //         user_id: topBuy.userId,
+    //         stock_id: topBuy.stockId,
+    //         qty: matchedQty,
+    //         price_of_purchase: tradePrice,
+    //         });
+    //     }
+    //     await buyerPortfolio.save();
+
+    //     // 6. Update seller's portfolio
+    //     sellerPortfolio.qty -= matchedQty;
+    //     await sellerPortfolio.save();
+
+    //     // 7. Add to transaction history
+    //     await TransactionHistory.create([
+    //         {
+    //         user_id: topBuy.userId,
+    //         stock_id: topBuy.stockId,
+    //         price: tradePrice,
+    //         buy_or_sell: 'buy',
+    //         qty: matchedQty,
+    //         },
+    //         {
+    //         user_id: topSell.userId,
+    //         stock_id: topSell.stockId,
+    //         price: tradePrice,
+    //         buy_or_sell: 'sell',
+    //         qty: matchedQty,
+    //         },
+    //     ]);
+
+    //     // 8. Update stock price
+    //     stock.open = tradePrice;
+    //     await stock.save();
+
+    //     // 9. Update heaps
+    //     buyHeap.dequeue();
+    //     sellHeap.dequeue();
+    //     topBuy.quantity -= matchedQty;
+    //     topSell.quantity -= matchedQty;
+    //     if (topBuy.quantity > 0) buyHeap.enqueue(topBuy);
+    //     if (topSell.quantity > 0) sellHeap.enqueue(topSell);
+
+    //     console.log(`Trade: ${matchedQty} of stock [${stock.stock_name}] at ₹${tradePrice}`);
+    //     } else {
+    //     break;
+    //     }
+    // }
+    // }
+
+    const matchOrdersForStock = async (stockId) => {
+            const tradeResults = [];
+            const book = orderBooks.get(stockId);
+            if (!book) return;
+            const { buyHeap, sellHeap } = book;
+            if (buyHeap.isEmpty() || sellHeap.isEmpty()) return;
+            while (!buyHeap.isEmpty() && !sellHeap.isEmpty()){
+            const topBuy = buyHeap.front();
+            const topSell = sellHeap.front();
+
+            const stock = await Stock.findById(stockId);
+            if (!stock) return;
+
+            // 1. Circuit Breaker Check
+            if (
+                topBuy.price > stock.upper_circuit || topBuy.price < stock.lower_circuit
+            ) {
+                console.warn(` buy price ${topBuy.price} for stock ${stock.stock_name} violates circuit. Removing buy order.`);
+                buyHeap.dequeue();
+                continue;
+            }
+            if (
+                topSell.price < stock.lower_circuit || topSell.price > stock.upper_circuit
+            ) {
+                console.warn(` Sell price ${topSell.price} for stock ${stock.stock_name} violates circuit. Removing sell order.`);
+                sellHeap.dequeue();
+                continue; 
+            }
+
+            // 2. Price Match Check
+            if (topBuy.price < topSell.price) {
+                console.info(`buy price (${topBuy.price}) is less than sell price (${topSell.price}). No match possible.`);
+                break; 
+            }
+
+            const matchedQty = Math.min(topBuy.quantity, topSell.quantity);
+            const tradePrice = topSell.price;
+
+            // 3. Balance + Portfolio Validation
+            const buyer = await User.findById(topBuy.userId);
+            const seller = await User.findById(topSell.userId);
+            if (!buyer || !seller) {
+                buyHeap.dequeue();
+                sellHeap.dequeue();
+                continue;
+            }
+
+            const totalCost = matchedQty * tradePrice;
+
+            if (buyer.balance < totalCost) {
+                buyHeap.dequeue();
+                continue;
+            }
+
+            const sellerPortfolio = await Portfolio.findOne({
+                user_id: topSell.userId,
+                stock_id: topSell.stockId,
+            });
+
+            if (!sellerPortfolio || sellerPortfolio.qty < matchedQty) {
+                sellHeap.dequeue();
+                continue;
+            }
+
+            //  4. Perform transaction
+            buyer.balance -= totalCost;
+            seller.balance += totalCost;
+            await buyer.save();
+            await seller.save();
+
+            //  5. Update Buyer's Portfolio
+            let buyerPortfolio = await Portfolio.findOne({
+                user_id: topBuy.userId,
+                stock_id: topBuy.stockId,
+            });
+
+            if (buyerPortfolio) {
+                buyerPortfolio.qty += matchedQty;
+            } else {
+                buyerPortfolio = new Portfolio({
+                user_id: topBuy.userId,
+                stock_id: topBuy.stockId,
+                qty: matchedQty,
+                price_of_purchase: tradePrice,
+                });
+            }
+            await buyerPortfolio.save();
+
+            //  6. Update Seller’s Portfolio
+            sellerPortfolio.qty -= matchedQty;
+            await sellerPortfolio.save();
+
+            //  7. Save to Transaction History                                                        
+            await TransactionHistory.create([
+                {
+                user_id: topBuy.userId,
+                stock_id: topBuy.stockId,
+                price: tradePrice,
+                buy_or_sell: 'buy',
+                qty: matchedQty,
+                },
+                {
+                user_id: topSell.userId,
+                stock_id: topSell.stockId,
+                price: tradePrice,
+                buy_or_sell: 'sell',
+                qty: matchedQty,
+                },
+            ]);
+
+            // //  8. Update stock price          
+            // stock.price_history.push({
+            //     price: stock.open, 
+            //     timestamp: new Date()
+            // });                                                        
+            // stock.open = tradePrice;
+            // await stock.save();
+
+            // 8. Update stock price and record to price history model
+            await PriceHistory.create({
+            stock_id: stock._id,
+            price: stock.open,
+            timestamp: new Date()
+            });
+
+            stock.open = tradePrice;
+            await stock.save();
+
+
+            //  9. Update Heaps                                                                                
+            buyHeap.dequeue();
+            sellHeap.dequeue();
+            topBuy.quantity -= matchedQty;
+            topSell.quantity -= matchedQty;
+
+            if (topBuy.quantity > 0) buyHeap.enqueue(topBuy);
+            if (topSell.quantity > 0) sellHeap.enqueue(topSell);
+
+            const tradeData = {
+                stock_id: stockId,
+                stock_name: stock.stock_name,
+                price: tradePrice,
+                qty: matchedQty,
+                buyer_id: topBuy.userId,
+                seller_id: topSell.userId,
+                buy_order_id: topBuy.orderId,
+                sell_order_id: topSell.orderId,
+                timestamp: Date.now(),
+            };
+
+            console.log(` Trade: ${matchedQty} units of ${stock.stock_name} @ ₹${tradePrice}`);
+            tradeResults.push(tradeData)
+        }
+
+        return tradeResults;
+};
+
+
+    module.exports = {
+        setupOrderBooks,
+        matchOrdersForStock,
+        addOrderToHeap
+    };
+

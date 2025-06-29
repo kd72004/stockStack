@@ -1,0 +1,9 @@
+| Collection    | Purpose                   |
+| ------------- | ------------------------- |
+| `users`       | All account holders       |
+| `stocks`      | Market stock details      |
+| `orders`      | All buy/sell orders       |
+| `trades`      | Trade history             |
+| `portfolios`  | User stock holdings       |
+| `watchlists`  | User's tracked stocks     |
+| `stockQueues` | Serialized heap per stock |
