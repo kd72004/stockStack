@@ -1,7 +1,9 @@
-// src/pages/StockHistory.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../axiosConfig";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from "recharts";
 
 export default function StockHistory() {
   const { stock_id } = useParams();
@@ -24,55 +26,43 @@ export default function StockHistory() {
         setLoading(false);
       }
     }
-
     fetchHistory();
   }, [stock_id]);
 
-  const handleOrder = (orderType) => {
-    navigate(`/order/place/${stock_id}`, { state: { type: orderType } });
-  };
+  const handleOrder = (type) => navigate(`/order/place/${stock_id}`, { state: { type } });
 
   if (loading) return <div className="p-6 text-white">Loading...</div>;
-
   if (!history.length) return <div className="p-6 text-white">No history found for this stock.</div>;
 
-  return (
-    <div className="p-6 bg-[#0f172a] min-h-screen text-white max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-blue-400 mb-4">
-        📊 Price History: {stockName}
-      </h2>
-      <table className="w-full text-left bg-[#1e293b] rounded-lg overflow-hidden">
-        <thead>
-          <tr className="text-blue-300">
-            <th className="p-2">#</th>
-            <th className="p-2">Price</th>
-            <th className="p-2">Timestamp</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map((entry, index) => (
-            <tr key={entry._id} className="hover:bg-[#334155] border-b border-gray-700">
-              <td className="p-2">{index + 1}</td>
-              <td className="p-2">₹{entry.price}</td>
-              <td className="p-2">{new Date(entry.timestamp).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+  const chartData = history.map((entry) => ({ price: entry.price, time: new Date(entry.timestamp).toLocaleTimeString() }));
 
-      <div className="mt-6 flex gap-4">
-        <button
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-          onClick={() => handleOrder('BUY')}
-        >
-          Buy
-        </button>
-        <button
-          className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
-          onClick={() => handleOrder('SELL')}
-        >
-          Sell
-        </button>
+  return (
+    <div className="p-6 bg-gradient-to-b from-gray-900 to-black min-h-screen text-white max-w-5xl mx-auto">
+      <h2 className="text-3xl font-extrabold text-blue-400 mb-6 text-center animate-pulse">
+        📈 {stockName} Stock Price Trend
+      </h2>
+
+      <div className="bg-[#1e293b] p-6 rounded-2xl shadow-2xl">
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="4 4" stroke="#475569" />
+            <XAxis dataKey="time" stroke="#cbd5e1" tick={{ fontSize: 12 }} />
+            <YAxis stroke="#cbd5e1" tick={{ fontSize: 12 }} />
+            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
+            <Legend />
+            <Line type="monotone" dataKey="price" stroke="#60a5fa" strokeWidth={3} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-2xl shadow-md transition transform hover:scale-105" onClick={() => handleOrder('BUY')}>Buy Stock</button>
+        <button className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-2xl shadow-md transition transform hover:scale-105" onClick={() => handleOrder('SELL')}>Sell Stock</button>
+      </div>
+
+      <div className="mt-10 text-gray-300 text-sm text-center">
+        <p>Market Status: <span className="text-green-400">Open</span></p>
+        <p className="mt-2">Note: Past performance does not guarantee future results. Trade wisely!</p>
       </div>
     </div>
   );
