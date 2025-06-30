@@ -4,7 +4,7 @@
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/yourusername/stockstack.git
+   git clone https://github.com/kd72004/stockstack.git
    cd stockstack
    ```
 
@@ -34,9 +34,15 @@
 
 ## 🙋‍♂️ Author
 
-- **Your Name**
-- [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- [Your GitHub](https://github.com/yourusername)
+- **Kalyani**
+
+## IMAGES : 
+![image](https://github.com/user-attachments/assets/c44fdc4c-24ba-4a2c-92a8-ab15329016f2)
+![image](https://github.com/user-attachments/assets/9e9b64a7-68da-495b-bd87-2e9f1790ab48)
+![image](https://github.com/user-attachments/assets/7d3b0fe7-cd54-47a6-be0f-afa38d59ed4e)
+![image](https://github.com/user-attachments/assets/20418c80-3657-4673-a88f-4fa8d4d38fae)
+![image](https://github.com/user-attachments/assets/8afa3eea-63f3-4dc5-92b6-419c1444ca8c)
+
 
 ## 📢 Notes
 
