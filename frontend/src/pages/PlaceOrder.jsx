@@ -1,4 +1,3 @@
-// src/pages/PlaceOrder.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from '../axiosConfig';
@@ -13,7 +12,7 @@ export default function PlaceOrder() {
   const [qty, setQty] = useState(1);
   const [price, setPrice] = useState('');
   const type = location.state?.type; // BUY or SELL
-  const user_id = getUserIdFromToken(); // assume this is stored after login
+  const user_id = getUserIdFromToken();
   
 
   useEffect(() => {

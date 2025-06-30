@@ -1,9 +1,9 @@
-// ...other imports
+
 import socket from '../services/socket';
 import React, { useEffect, useState } from 'react';
 
 
-// --- OrderBook component ---
+
 function OrderBook({ stockId }) {
   const [orderBook, setOrderBook] = useState({ buyHeap: [], sellHeap: [] });
   const [trades, setTrades] = useState([]);
