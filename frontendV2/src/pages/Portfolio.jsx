@@ -1,14 +1,13 @@
     import { useEffect, useState } from 'react';
     import { useNavigate } from 'react-router-dom';
     import axios from '../axiosConfig';
-    import { getUserIdFromToken } from '../utils/decodeToken'; // ✅ Add this import
+    import { getUserIdFromToken } from '../utils/decodeToken'; 
     import OrderBook from './OrderBook';
 
     export default function Portfolio() {
     const [portfolio, setPortfolio] = useState([]);
     const navigate = useNavigate();
     const user_id = getUserIdFromToken(); 
-    //   console.log(user_id);
     useEffect(() => {
         const fetchPortfolio = async () => {
         try {

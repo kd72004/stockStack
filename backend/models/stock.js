@@ -8,9 +8,9 @@ const stockSchema = new mongoose.Schema({
     upper_circuit: { type: Number, required: true },
     lower_circuit: { type: Number, required: true },
     qty: { type: Number, required: true },
-    market_cap: { type: Number }, // in billions
+    market_cap: { type: Number }, 
     pe_ratio: { type: Number },
-    dividend_yield: { type: Number }, // in %
+    dividend_yield: { type: Number }, 
     about: { type: String },
     headquarters: { type: String },
     ceo: { type: String },

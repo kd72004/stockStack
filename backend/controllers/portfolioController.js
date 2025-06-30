@@ -1,7 +1,6 @@
 const Portfolio = require('../models/portfolio');
 const Stock = require('../models/stock');
 
-// GET all portfolio items for a user
 exports.getUserPortfolio = async (req, res) => {
   try {
     const portfolios = await Portfolio.find({ user_id: req.params.user_id })
@@ -14,7 +13,7 @@ exports.getUserPortfolio = async (req, res) => {
   }
 };
 
-// UPDATE (add qty & adjust avg purchase price if same stock is bought again)
+
 exports.updatePortfolio = async (req, res) => {
   try {
     const { user_id, stock_id, qty, price_of_purchase } = req.body;
@@ -33,7 +32,6 @@ exports.updatePortfolio = async (req, res) => {
       return res.status(200).json({ message: 'Portfolio updated', portfolio });
     }
 
-    // If not found, create new
     portfolio = new Portfolio({
       user_id,
       stock_id,
@@ -49,7 +47,6 @@ exports.updatePortfolio = async (req, res) => {
   }
 };
 
-// DELETE portfolio item by ID
 exports.deletePortfolio = async (req, res) => {
   try {
     const result = await Portfolio.findByIdAndDelete(req.params.id);

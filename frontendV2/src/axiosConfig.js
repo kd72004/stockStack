@@ -7,7 +7,6 @@ const instance = axios.create({
   },
 });
 
-// ✅ Attach token from localStorage automatically
 const token = localStorage.getItem("token");
 if (token) {
   instance.defaults.headers.common["Authorization"] = `Bearer ${token}`;

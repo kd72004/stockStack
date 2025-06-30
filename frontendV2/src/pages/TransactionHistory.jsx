@@ -10,7 +10,7 @@ export default function TransactionHistory() {
     const fetchTransactions = async () => {
       try {
         const res = await axios.get(`/transection/${id}`);
-        console.log("Fetched Transactions:", res.data); // ✅ Verify structure
+        console.log("Fetched Transactions:", res.data); 
         setTransactions(res.data);
       } catch (err) {
         console.error("Error fetching transaction history", err);

@@ -14,7 +14,6 @@
         const user = await User.findById(user_id);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Circuit Breaker Checks
         if (type === 'BUY' && price > stock.upper_circuit)
         return res.status(400).json({ error: 'BUY blocked: price exceeds upper circuit' });
 

@@ -54,7 +54,6 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-// Make io available to other modules
 module.exports.io = io;
 
 io.on('connection', (socket) => {

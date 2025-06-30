@@ -1,6 +1,5 @@
 const PriceHistory = require('../models/priceHistory');
 
-// GET all price history entries
 exports.getAllPriceHistory = async (req, res) => {
   try {
     const history = await PriceHistory.find().populate('stock_id', 'stock_name company_name');
@@ -11,7 +10,6 @@ exports.getAllPriceHistory = async (req, res) => {
   }
 };
 
-// GET history for a specific stock
 exports.getHistoryByStockId = async (req, res) => {
   try {
     const { stock_id } = req.params;

@@ -32,8 +32,6 @@ export default function App() {
             <Link to={`/portfolio/${user_id}`} className="mr-4 hover:underline">Portfolio</Link>
             <Link to={`/watchlist`} className="mr-4 hover:underline">WatchList</Link>
             <Link to={`/transaction/${user_id}`} className="mr-4 hover:underline">TransactionHistory</Link>
-            {/* <Link to="/login" className="mr-4 hover:underline">Login</Link>
-            <Link to="/signup" className="hover:underline">Signup</Link> */}
           </div>
         </nav>
 

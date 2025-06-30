@@ -6,8 +6,8 @@ exports.getTransactionsByUser = async (req, res) => {
     const { userId } = req.params;
 
     const transactions = await TransactionHistory.find({ user_id: userId })
-      .populate('stock_id') // 👈 to get stock info too
-      .sort({ date: -1 });   // 👈 latest first
+      .populate('stock_id') 
+      .sort({ date: -1 });  
 
     const formatted = transactions.map(txn => ({
       stock_name: txn.stock_id.stock_name,

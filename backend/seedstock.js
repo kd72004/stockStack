@@ -1,7 +1,7 @@
 // seedStocks.js
 require('dotenv').config();
 const mongoose = require('mongoose');
-const Stock = require('./models/stock'); // adjust path if needed
+const Stock = require('./models/stock'); 
 
 const initialStocks = [
   {

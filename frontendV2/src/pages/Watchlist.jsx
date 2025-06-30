@@ -48,9 +48,9 @@ export default function Watchlist() {
 //       fetchWatchlistUser();
 //     } catch (err) {
 //       if (err.response && err.response.status === 400 && err.response.data?.error === "Already in watchlist") {
-//         alert("⚠️ Stock is already in your watchlist");
+//         alert(" Stock is already in your watchlist");
 //       } else {
-//         console.error("❌ Error adding to watchlist", err);
+//         console.error(" Error adding to watchlist", err);
 //       }
 //     }
 //   };
@@ -67,7 +67,6 @@ const addToWatchlist = async (stock_id) => {
     setAllStocks(prev => prev.filter(stock => stock._id !== stock_id));
     fetchWatchlistUser();
 
-    // 👉 Clear search bar to hide filtered dropdown
     setSearchTerm("");
   } catch (err) {
     if (err.response && err.response.status === 400 && err.response.data?.error === "Already in watchlist") {

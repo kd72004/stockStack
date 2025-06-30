@@ -18,10 +18,10 @@ export default function Signup() {
       const res = await axios.post('http://localhost:3000/auth/signup', {
         name, email_id, password, balance
       });
-      setMessage('✅ Signup successful!');
+      setMessage(' Signup successful!');
       setTimeout(() => navigate('/login'), 1000);
     } catch (err) {
-  const errorMessage = err.response?.data?.message || '❌ Signup failed: Server error';
+  const errorMessage = err.response?.data?.message || ' Signup failed: Server error';
   setMessage(errorMessage);
 }
 

@@ -1,8 +1,0 @@
-user 
-stock - stockid name uppercircuit and lowercircuit open_price volume 
-watchlist - usid stockid ki list 
-stockholdings - stockid usid qty priceatbuy time date and 
-transection history - date qty sell/buy and profit and stockid and user id 
-potfolio - 
-
-

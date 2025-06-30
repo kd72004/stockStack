@@ -1,10 +1,9 @@
-// @ts-nocheck
     const mongoose = require('mongoose');
     const { MaxPriorityQueue, MinPriorityQueue } = require('@datastructures-js/priority-queue');
 
     const Stock = require('../models/stock');
     const Order = require('../models/order');
-    const { io } = require('../index'); // adjust path as needed
+    const { io } = require('../index'); 
 
     const User = require('../models/user');
     const Portfolio = require('../models/portfolio');
@@ -16,7 +15,7 @@
     const redis = new Redis();
     const redlock = new Redlock([redis], {
         retryCount: 10,
-        retryDelay: 200, // ms
+        retryDelay: 200, 
     });
     // function formatOrder(order) {
     //     return {
@@ -29,8 +28,6 @@
     //     };
     // }
 
-    
-    // Custom Comparators
     const buyComparator = (a, b) => {
     if (a.price !== b.price) return b.price - a.price;
     if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
@@ -68,15 +65,12 @@ async function saveOrderBookToRedis(stockId, buyHeap, sellHeap) {
     async function setupOrderBooks() {
     orderBooks = await initializeEmptyOrderBooks(); 
     }
-    
-    // orderEngine.js
 async function addOrderToHeap(order) {
     const stockId = order.stock_id.toString();
     const lockKey = `lock:orderbook:${stockId}`;
     let lock;
     try {
-        // Acquire lock for this stock's order book
-        lock = await redlock.acquire([lockKey], 2000); // 2 seconds TTL
+        lock = await redlock.acquire([lockKey], 2000); 
         const formattedOrder = {
             orderId: order._id.toString(),
             userId: order.user_id.toString(),
@@ -98,13 +92,11 @@ async function addOrderToHeap(order) {
             book.sellHeap.enqueue(formattedOrder);
         }
 
-        // Save to Redis after adding order
         await saveOrderBookToRedis(formattedOrder.stockId, book.buyHeap, book.sellHeap);
 
         const tradeResults = await matchOrdersForStock(formattedOrder.stockId);
         return tradeResults;
     } finally {
-        // Always release the lock!
         if (lock) await redlock.unlock(lock);
     }
 }
@@ -122,7 +114,6 @@ async function addOrderToHeap(order) {
             const stock = await Stock.findById(stockId);
             if (!stock) return;
 
-            // 1. Circuit Breaker Check
             if (
                 topBuy.price > stock.upper_circuit || topBuy.price < stock.lower_circuit
             ) {
@@ -280,7 +271,6 @@ async function addOrderToHeap(order) {
 
         // Save to Redis after every heap change
         await saveOrderBookToRedis(stockId, buyHeap, sellHeap);
-        // Emit order book update
         io.emit('orderBookUpdate', {
             stockId,
             buyHeap: buyHeap.toArray(),
@@ -298,18 +288,13 @@ async function addOrderToHeap(order) {
                 sell_order_id: topSell.orderId,
                 timestamp: Date.now(),
             };
-
-            // Emit trade executed event
             io.emit('tradeExecuted', tradeData);
 
             console.log(` Trade: ${matchedQty} units of ${stock.stock_name} @ ₹${tradePrice}`);
             tradeResults.push(tradeData)
         }
-
-
         return tradeResults;
 };
-
     module.exports = {
         setupOrderBooks,
         matchOrdersForStock,

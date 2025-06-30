@@ -18,7 +18,6 @@ export default function Home() {
           axios.get(`/user/${userId}`),
           axios.get(`/portfolio/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
           axios.get(`/transection/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-          // axios.get(`/transaction/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
 
         setUser(userRes.data);
@@ -44,8 +43,6 @@ export default function Home() {
           <p className="text-green-400 mt-2 text-lg">💰 Balance: ₹{user.balance.toFixed(2)}</p>
         </div>
       )}
-
-      {/* Portfolio Section */}
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-3 text-yellow-400">📊 Top Holdings</h3>
         {portfolio.length === 0 ? (
@@ -71,7 +68,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Transactions */}
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-3 text-purple-400">🧾 Last 3 Transactions</h3>
         {transactions.length === 0 ? (
