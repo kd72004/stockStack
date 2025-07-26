@@ -1,10 +1,10 @@
 #include "Exchange.hpp"
 #include "OrderValidator.hpp"
 #include <iostream>
-
+using namespace std;
 void Exchange::placeOrder(Order& order, User& user, Stock& stock, PortfolioEntry& portfolio) {
     bool success = false;
-    std::string reason;
+    string reason;
 
     if (order.getOrderType() == OrderType::BUY) {
         success = OrderValidator::validateBuy(order, user, reason) && executeBuy(order, user, stock, portfolio);
@@ -14,10 +14,10 @@ void Exchange::placeOrder(Order& order, User& user, Stock& stock, PortfolioEntry
 
     if (success) {
         order.markExecuted();
-        std::cout << "✅ Order executed\n";
+        cout << "Order executed\n";
     } else {
         order.markRejected(reason);
-        std::cout << "❌ Order failed: " << reason << "\n";
+        cout << "Order failed: " << reason << "\n";
         orderBook.push_back(order);
     }
 }

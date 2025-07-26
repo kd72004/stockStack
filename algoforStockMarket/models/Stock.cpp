@@ -1,16 +1,17 @@
 #include "Stock.hpp"
 #include <random>
-#include <ctime> // if you need time for timestamps, not randomness
+#include <ctime> 
+using namespace std;
 
-Stock::Stock(int stockId, const std::string& symbol, const std::string& companyName,
+Stock::Stock(int stockId, const string& symbol, const string& companyName,
              double openPrice, double upperCircuit, double lowerCircuit, int quantity)
     : stockId(stockId), symbol(symbol), companyName(companyName),
       openPrice(openPrice), upperCircuit(upperCircuit), lowerCircuit(lowerCircuit),
       price(openPrice), dayHigh(openPrice), dayLow(openPrice), availableQuantity(quantity) {}
 
 int Stock::getStockId() const { return stockId; }
-const std::string& Stock::getSymbol() const { return symbol; }
-const std::string& Stock::getCompanyName() const { return companyName; }
+const string& Stock::getSymbol() const { return symbol; }
+const string& Stock::getCompanyName() const { return companyName; }
 double Stock::getCurrentPrice() const { return price; }
 double Stock::getOpenPrice() const { return openPrice; }
 double Stock::getDayHigh() const { return dayHigh; }
@@ -38,11 +39,11 @@ bool Stock::decreaseQuantity(int qty) {
     return true;
 }
 
-// ✅ Modern random version
-Stock Stock::createAutoStock(int stockId, const std::string& symbol, const std::string& companyName, int quantity) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dist(100.0, 1100.0); // open price range
+
+Stock Stock::createAutoStock(int stockId, const string& symbol, const string& companyName, int quantity) {
+    static random_device rd;
+    static mt19937 gen(rd());
+    uniform_real_distribution<> dist(100.0, 1100.0); // open price range
 
     double openPrice = dist(gen);
     double upperCircuit = openPrice * 1.10;

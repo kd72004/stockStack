@@ -21,7 +21,7 @@ struct Order {
         : orderId(oid), userId(uid), type(t), price(p), quantity(q), timestamp(time(nullptr)) {}
 };
 
-// Comparator for Buy Orders (Max-Heap)
+// Comparator for Buy Orders 
 struct BuyOrderComparator {
     bool operator()(const Order& a, const Order& b) const {
         if (a.price != b.price) return a.price < b.price; // Higher price first
@@ -30,7 +30,7 @@ struct BuyOrderComparator {
     }
 };
 
-// Comparator for Sell Orders (Min-Heap)
+// Comparator for Sell Orders 
 struct SellOrderComparator {
     bool operator()(const Order& a, const Order& b) const {
         if (a.price != b.price) return a.price > b.price; // Lower price first
@@ -100,7 +100,7 @@ void matchOrdersForStock(int stockId) {
             int matchedQty = min(topBuy.quantity, topSell.quantity);
             double tradePrice = topSell.price;
 
-            cout << "✅ TRADE EXECUTED for Stock [" << stock.symbol << "]" << endl;
+            cout << "TRADE EXECUTED for Stock [" << stock.symbol << "]" << endl;
             cout << "Buyer ID: " << topBuy.userId << ", Seller ID: " << topSell.userId << endl;
             cout << "Price: ₹" << tradePrice << ", Quantity: " << matchedQty << endl;
             cout << "---------------------------------------------" << endl;

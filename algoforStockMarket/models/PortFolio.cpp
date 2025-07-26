@@ -1,6 +1,7 @@
 #include "Portfolio.hpp"
 #include "Stock.hpp"
 #include "User.hpp"
+using namespace std;
 PortfolioEntry::PortfolioEntry(int userId, int stockId, int quantity, double buyPrice)
     : userId(userId), stockId(stockId), quantity(quantity), buyPrice(buyPrice), currentPrice(buyPrice) {}
 

@@ -35,7 +35,7 @@ struct Stock {
     }
 };
 
-// Max Heap for Buyers
+// buy
 struct BuyOrderComparator {
     bool operator()(const Order& a, const Order& b) const {
         if (a.price != b.price) return a.price < b.price;               // High price first
@@ -44,7 +44,7 @@ struct BuyOrderComparator {
     }
 };
 
-// Min Heap for Sellers
+// sell
 struct SellOrderComparator {
     bool operator()(const Order& a, const Order& b) const {
         if (a.price != b.price) return a.price > b.price;               // Low price first
@@ -60,15 +60,14 @@ map<int, pair<
     priority_queue<Order, vector<Order>, SellOrderComparator>
 >> orderBooks;
 
-// Check upper/lower circuit logic
 bool validateOrder(const Order& order) {
-    const Stock& stock = stockMap[order.orderId % 100]; // Extract stockId from last 2 digits of orderId
+    const Stock& stock = stockMap[order.orderId % 100]; 
     if (stock.currentPrice >= stock.upperCircuit && order.type == OrderType::BUY) {
-        cout << "❌ BUY BLOCKED: Price at upper circuit for stock " << stock.symbol << endl;
+        cout << "BUY BLOCKED: Price at upper circuit for stock " << stock.symbol << endl;
         return false;
     }
     if (stock.currentPrice <= stock.lowerCircuit && order.type == OrderType::SELL) {
-        cout << "❌ SELL BLOCKED: Price at lower circuit for stock " << stock.symbol << endl;
+        cout << " SELL BLOCKED: Price at lower circuit for stock " << stock.symbol << endl;
         return false;
     }
     return true;
@@ -97,7 +96,7 @@ void matchOrdersForStock(int stockId) {
             int matchedQty = min(topBuy.quantity, topSell.quantity);
             double tradePrice = topSell.price;
 
-            cout << "✅ TRADE EXECUTED for " << stock.symbol << " at Rs. " << tradePrice << endl;
+            cout << " TRADE EXECUTED for " << stock.symbol << " at Rs. " << tradePrice << endl;
             cout << "Buyer ID: " << topBuy.userId << ", Seller ID: " << topSell.userId << endl;
             cout << "Quantity: " << matchedQty << endl;
             cout << "-----------------------------------------" << endl;
@@ -123,14 +122,14 @@ int main() {
     stockMap[1] = Stock(1, "TATA", 100);
     stockMap[2] = Stock(2, "RELIANCE", 500);
 
-    // Add Orders for TATA (stockId = 1)
+    // Add Orders for sid 1 
     addOrder(1, Order(10101, 101, OrderType::BUY, 101, 5));
     addOrder(1, Order(10102, 102, OrderType::BUY, 99, 7));
     addOrder(1, Order(10103, 103, OrderType::BUY, 98, 3));
     addOrder(1, Order(10104, 201, OrderType::SELL, 97, 5));
     addOrder(1, Order(10105, 202, OrderType::SELL, 98, 10));
 
-    // Add Orders for RELIANCE (stockId = 2)
+    // Add Orders for sid 2 
     addOrder(2, Order(10201, 301, OrderType::BUY, 510, 4));
     addOrder(2, Order(10202, 401, OrderType::SELL, 480, 2));
 

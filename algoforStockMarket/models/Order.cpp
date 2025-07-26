@@ -1,11 +1,11 @@
 #include "Order.hpp"
 #include <ctime>
-
+using namespace std;
 Order::Order(int orderId, int userId, int stockId, int portfolioId,
              OrderType type, int quantity, double price)
     : orderId(orderId), userId(userId), stockId(stockId), portfolioId(portfolioId),
       type(type), quantity(quantity), price(price), status(OrderStatus::PENDING), rejectionReason("") {
-    timestamp = std::time(nullptr);
+    timestamp =time(nullptr);
 }
 
 int Order::getOrderId() const { return orderId; }
@@ -17,13 +17,13 @@ int Order::getQuantity() const { return quantity; }
 double Order::getPrice() const { return price; }
 std::time_t Order::getTimestamp() const { return timestamp; }
 OrderStatus Order::getStatus() const { return status; }
-const std::string& Order::getRejectionReason() const { return rejectionReason; }
+conststring& Order::getRejectionReason() const { return rejectionReason; }
 
 void Order::markExecuted() {
     status = OrderStatus::EXECUTED;
 }
 
-void Order::markRejected(const std::string& reason) {
+void Order::markRejected(conststring& reason) {
     status = OrderStatus::REJECTED;
     rejectionReason = reason;
 }

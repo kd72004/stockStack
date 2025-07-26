@@ -85,20 +85,20 @@ void matchOrdersForStock(int stockId) {
 
 int main() {
     // Example: stockId 1 → TATA, stockId 2 → RELIANCE
-    addOrder(1, Order(1, 101, OrderType::BUY, 101, 5));  // TATA
-    addOrder(1, Order(2, 102, OrderType::BUY, 99, 7));   // TATA
-    addOrder(1, Order(3, 103, OrderType::BUY, 98, 3));   // TATA
+    addOrder(1, Order(1, 101, OrderType::BUY, 101, 5)); 
+    addOrder(1, Order(2, 102, OrderType::BUY, 99, 7));  
+    addOrder(1, Order(3, 103, OrderType::BUY, 98, 3));  
 
-    addOrder(1, Order(4, 201, OrderType::SELL, 97, 5));  // TATA
-    addOrder(1, Order(5, 202, OrderType::SELL, 98, 10)); // TATA
+    addOrder(1, Order(4, 201, OrderType::SELL, 97, 5)); 
+    addOrder(1, Order(5, 202, OrderType::SELL, 98, 10));
 
-    addOrder(2, Order(6, 301, OrderType::BUY, 500, 4));  // RELIANCE
-    addOrder(2, Order(7, 401, OrderType::SELL, 480, 2)); // RELIANCE
+    addOrder(2, Order(6, 301, OrderType::BUY, 500, 4));  
+    addOrder(2, Order(7, 401, OrderType::SELL, 480, 2)); 
 
-    // Match for TATA
+    
     matchOrdersForStock(1);
 
-    // Match for RELIANCE
+    
     matchOrdersForStock(2);
 
     return 0;

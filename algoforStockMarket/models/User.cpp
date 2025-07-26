@@ -1,17 +1,18 @@
 #include "User.hpp"
+using namespace std;
 
-User::User(int userId, const std::string& name, const std::string& email, double balance)
+User::User(int userId, const string& name, const string& email, double balance)
     : userId(userId), name(name), email(email), balance(balance) {}
 
 int User::getUserId() const {
     return userId;
 }
 
-const std::string& User::getName() const {
+const string& User::getName() const {
     return name;
 }
 
-const std::string& User::getEmail() const {
+const string& User::getEmail() const {
     return email;
 }
 
