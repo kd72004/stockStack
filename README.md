@@ -37,6 +37,8 @@ A real-time stock trading application built with a custom stock matching engine 
 - **Kalyani**
 
 ## IMAGES : 
+<img width="3142" height="1726" alt="image" src="https://github.com/user-attachments/assets/aad57e66-6527-4c66-8a97-a386a29a706d" />
+
 ![image](https://github.com/user-attachments/assets/8b4d07e6-0a74-4997-8b71-ee64f8a1675d)
 
 ![image](https://github.com/user-attachments/assets/aee70b37-6fcd-489e-bdba-de78aa3cb051)
