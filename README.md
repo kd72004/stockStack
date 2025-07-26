@@ -1,5 +1,8 @@
 # stockStack
-
+A real-time stock trading application built with a custom stock matching engine using heap data structures.  
+Redis is used to store and update the live order book for high-speed access and real-time performance.  
+The system ensures instant reflection of trades and price changes across the platform.  
+Designed for performance, reliability, and realistic trading experience.  
 ## 📝 How to Run
 
 1. **Clone the repo:**
