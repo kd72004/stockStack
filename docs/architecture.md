@@ -9,82 +9,281 @@ Implemented user authentication, watchlist, and transaction history for a realis
 ## 📌 List of Objects + Context + er diagram 
 <img width="3142" height="1726" alt="image" src="https://github.com/user-attachments/assets/aad57e66-6527-4c66-8a97-a386a29a706d" />
 
-### 1. 👤 `User`
-- **Context**: Authentication & account management
-- **Info**:
-  - `user_id`, `username`, `email`, `password`
-  - `accountBalance`
-  - Used to identify and authorize actions like buying/selling, watching stocks, etc.
+1. 👤 User
+Context:
+Used for authentication, account management, and linking with orders, portfolio, watchlist, and transactions.
 
----
+Description:
+User has the following attributes:
 
-### 2. 🧾 `Order`
-- **Context**: Buy/sell request made by a user
-- **Info**:
-  - Fields: `order_id`, `user_id`, `stock_id`, `qty`, `price`, `type (BUY/SELL)`, `timestamp`
-  - Stored temporarily in Redis for matching
-  - Upon match, triggers portfolio & transaction update
+name as a string
 
----
+email_id as a unique string
 
-### 3. 🔀 `Matching Engine`
-- **Context**: Real-time trading logic
-- **Info**:
-  - Works directly with Redis heap
-  - `BUY` heap = max-heap (higher price, higher priority)
-  - `SELL` heap = min-heap (lower price, higher priority)
-  - Continuously matches orders by comparing top entries from both heaps
-  - Final matched chage in the order status and add to transection history
+password as a string
 
----
+balance as a number with default value 0
 
-### 4. 📊 `Stock`
-- **Context**: for trading
-- **Info**:
-  - Fields: `stock_id`, `name`, `symbol`, `qty`, `currentPrice`, `upperCircuit`, `lowerCircuit`
-  - Updated on every trade
-  - Displayed in leaderboard & user dashboard
+createdAt and updatedAt for timestamps
 
----
+Interacts With:
 
-### 5. 🧺 `Portfolio`
-- **Context**: Tracks each user’s holdings
-- **Info**:
-  - Stores: `user_id`, `stock_id`, `qtyOwned`, `avgBuyingPrice`
-  - Updated after each successful `BUY` or `SELL` order
-  - Displayed in user's dashboard
+Order to place buy or sell requests
 
----
+Portfolio to manage holdings
 
-### 6. 🧾 `TransactionHistory`
-- **Context**: Final, executed trades
-- **Info**:
-  - Fields: `transaction_id`, `buyer_id`, `seller_id`, `stock_id`, `price`, `qty`, `timestamp`
-  - Used to analyze past trades and calculate profit/loss
+TransactionHistory to log completed trades
 
----
+Watchlist to track selected stocks
 
-### 7. 🕐 `PriceHistory`
-- **Context**: Shows price trend for stocks
-- **Info**:
-  - Fields: `stock_id`, `price`, `timestamp`
-  - Used in charting frontend graphs
+Redis for user ID in order books
 
----
+2. 🧾 Order
+Context:
+Created whenever a user places a buy or sell request. Orders are pushed to Redis for real-time matching.
 
-### 8. 👀 `Watchlist`
-- **Context**: Allows users to monitor favorite stocks
-- **Info**:
-  - Fields: `user_id`, `stock_ids[]`
-  - Helps in sending notifications or alerts (future scope)
+Description:
+Order contains:
 
----
+user_id linked to a User
 
-### 9. ⚡ `Redis`
-- **Context**: In-memory data structure for real-time order book
-- **Info**:
-  - Keys: `stock:<stock_id>:BUY`, `stock:<stock_id>:SELL`
-  - Values: Arrays of `{user_id, qty, price, timestamp}`
-  - Essential for speed in matching engine
+stock_id linked to a Stock
 
----
+qty as a number
+
+price as a number
+
+type which can be either BUY or SELL
+
+status which can be OPEN by default, or change to PARTIAL, FILLED, or CANCELLED
+
+createdAt and updatedAt for timestamps
+
+Interacts With:
+
+User who placed the order
+
+Stock the order is for
+
+Redis which stores the order in heaps
+
+TransactionHistory after a match is made
+
+Portfolio when ownership changes after matching
+
+3. 🔀 Matching Engine
+Context:
+Runs continuously to match buy and sell orders using Redis.
+
+Description:
+The engine pulls from Redis keys:
+
+stock followed by stock ID and BUY for max heap
+
+stock followed by stock ID and SELL for min heap
+
+It compares top orders and on a successful match:
+
+Updates the order status
+
+Creates a new TransactionHistory entry
+
+Modifies the portfolio for both buyer and seller
+
+Decreases the quantity in the Stock
+
+Interacts With:
+
+Redis to fetch and update orders
+
+Order to update statuses
+
+TransactionHistory to log trades
+
+Portfolio to update holdings
+
+Stock to adjust available quantity
+
+4. 📊 Stock
+Context:
+Represents a tradable company stock and includes data for the platform and analytics.
+
+Description:
+Stock includes the following fields:
+
+stock_name
+
+company_name
+
+sector
+
+open
+
+upper_circuit and lower_circuit
+
+qty available for trade
+
+market_cap
+
+pe_ratio
+
+dividend_yield
+
+about
+
+ceo
+
+headquarters
+
+createdAt and updatedAt for timestamps
+
+Interacts With:
+
+Order when user places a trade
+
+Portfolio when user owns a stock
+
+Watchlist when user follows a stock
+
+TransactionHistory for each executed trade
+
+PriceHistory to track value changes
+
+Redis to manage stock's order book
+
+5. 🧺 Portfolio
+Context:
+Tracks the user's holdings in different stocks.
+
+Description:
+Portfolio includes:
+
+user_id linked to the User
+
+stock_id linked to the Stock
+
+qty indicating how many shares the user owns
+
+price_of_purchase
+
+date_of_purchase
+
+Interacts With:
+
+User who owns the shares
+
+Stock being held
+
+TransactionHistory to reflect updates
+
+Order when holdings are modified after matching
+
+6. 🧾 TransactionHistory
+Context:
+Keeps a record of successful trades for reporting and profit or loss calculations.
+
+Description:
+Transaction record includes:
+
+user_id
+
+stock_id
+
+price at which trade happened
+
+buy_or_sell to indicate direction
+
+qty of shares traded
+
+date of the transaction
+
+Interacts With:
+
+User who completed the trade
+
+Stock that was traded
+
+Portfolio to update quantity or remove
+
+Order to reference matched orders
+
+7. 🕐 PriceHistory
+Context:
+Maintains the price trend for each stock for frontend charting and analysis.
+
+Description:
+It stores:
+
+stock_id linked to Stock
+
+price value
+
+timestamp when price was recorded
+
+Interacts With:
+
+Stock to map price changes
+
+Frontend to display graphs
+
+Matching Engine which can update prices during trades
+
+8. 👀 Watchlist
+Context:
+Lets users track specific stocks they’re interested in.
+
+Description:
+Watchlist includes:
+
+user_id linked to User
+
+stock_id linked to Stock
+
+createdAt and updatedAt for timestamps
+
+Interacts With:
+
+User who created the watchlist
+
+Stock being followed
+
+Can later integrate with notification system
+
+9. ⚡ Redis
+Context:
+Redis is used as a high-speed in-memory store for maintaining live order books and enabling the matching engine.
+
+Description:
+Each stock has two Redis keys:
+
+stock followed by stock ID and BUY
+
+stock followed by stock ID and SELL
+
+Each Redis list contains entries like:
+
+user_id
+
+qty
+
+price
+
+timestamp
+
+Orders are sorted using heaps:
+
+BUY orders are stored in a max-heap so highest price has priority
+
+SELL orders are stored in a min-heap so lowest price is matched first
+
+Interacts With:
+
+Order for inserting and fetching real-time data
+
+Matching Engine as core storage for logic
+
+User ID as part of each order entry
+
+Stock to organize buy and sell books
+
+
