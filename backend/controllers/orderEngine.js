@@ -83,7 +83,12 @@ async function addOrderToHeap(order) {
 
         const book = orderBooks.get(formattedOrder.stockId);
         if (!book) {
-            throw new Error(`Stock ${formattedOrder.stockId} not found in orderBooks`);
+            // throw new Error(`Stock ${formattedOrder.stockId} not found in orderBooks`);
+            const buyHeap = new Heap((a, b) => b.price - a.price); // Max heap
+            const sellHeap = new Heap((a, b) => a.price - b.price); // Min heap
+            book = { buyHeap, sellHeap };
+            orderBooks.set(stockId, book);
+            console.warn(`Stock ${stockId} was not in memory. Initialized a new order book.`);
         }
 
         if (formattedOrder.type === 'BUY') {
