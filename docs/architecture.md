@@ -6,7 +6,8 @@ Implemented user authentication, watchlist, and transaction history for a realis
 
 ---
 
-## 📌 List of Objects + Context
+## 📌 List of Objects + Context + er diagram 
+<img width="3142" height="1726" alt="image" src="https://github.com/user-attachments/assets/aad57e66-6527-4c66-8a97-a386a29a706d" />
 
 ### 1. 👤 `User`
 - **Context**: Authentication & account management
