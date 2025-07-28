@@ -27,8 +27,6 @@ A real-time stock trading application built with a custom stock matching engine 
   Order book, trades, and price updates are pushed instantly to all users.
 - **Redis-Powered:**  
   Order book is stored in Redis for speed and multi-server support.
-- **WebSocket Integration:**  
-  Used Socket.IO for live updates and a seamless trading experience.
 - **Scalable & Robust:**  
   Built with production-ready patterns for scaling and reliability.
 
